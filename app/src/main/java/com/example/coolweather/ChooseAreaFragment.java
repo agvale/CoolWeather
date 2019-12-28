@@ -3,6 +3,7 @@ package com.example.coolweather;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,6 +67,7 @@ public class ChooseAreaFragment extends Fragment {
         backButton = (Button) view.findViewById(R.id.back_button);
         listView = (ListView) view.findViewById(R.id.list_view);
         adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1,dataList);
+        listView.setAdapter(adapter);
         return view;
     }
 
@@ -83,11 +85,25 @@ public class ChooseAreaFragment extends Fragment {
                     queryCounties();
                 } else if (currentLevel == LEVEL_COUNTY) {
                     String weatherId = countyList.get(position).getWeatherId();
-//                    Intent intent = new Intent(getActivity())
+                    if (getActivity() instanceof MainActivity) {
+
+                    }
                 }
             }
         });
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currentLevel == LEVEL_COUNTY) {
+                    queryCities();
+                } else if (currentLevel == LEVEL_CITY) {
+                    queryProvinces();
+                }
+            }
+        });
+        queryProvinces();
     }
+
 
     private void queryProvinces() {
         titleText.setText("中国");
@@ -131,7 +147,7 @@ public class ChooseAreaFragment extends Fragment {
         backButton.setVisibility(View.VISIBLE);
         countyList = LitePal.where("cityid = ?", String.valueOf(selectedCity.getId())).find(County.class);
         if (countyList.size() > 0) {
-            countyList.clear();;
+            dataList.clear();;
             for (County county : countyList){
                 dataList.add(county.getCountyName());
             }
@@ -151,11 +167,12 @@ public class ChooseAreaFragment extends Fragment {
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                Log.d("http", e.getMessage());
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         closeProgressDialog();
-                        Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "加载失败....", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -192,7 +209,7 @@ public class ChooseAreaFragment extends Fragment {
     }
 
     private void showProgressDialog() {
-        if (progressDialog == nil) {
+        if (progressDialog == null) {
             progressDialog = new ProgressDialog(getActivity());
             progressDialog.setMessage("正在加载。。。");
             progressDialog.setCanceledOnTouchOutside(false);
@@ -205,7 +222,5 @@ public class ChooseAreaFragment extends Fragment {
             progressDialog.dismiss();
         }
     }
-
-    private void
 
 }
